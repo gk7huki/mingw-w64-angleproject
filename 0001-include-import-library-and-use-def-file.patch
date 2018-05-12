@@ -1,0 +1,58 @@
+diff --git a/src/libEGL.gypi b/src/libEGL.gypi
+index fdce4ba2b1..6f79d34a30 100644
+--- a/src/libEGL.gypi
++++ b/src/libEGL.gypi
+@@ -49,11 +49,17 @@
+                     'xcode_settings':
+                     {
+                         'DYLIB_INSTALL_NAME_BASE': '@rpath',
+                     },
+                 }],
++                ['TARGET=="win32" or TARGET=="win64"', {
++                    'ldflags': [ '-Wl,--out-implib,libEGL.dll.a ../src/libEGL/libEGL.def -Wl,--enable-stdcall-fixup' ],
++                }],
+             ],
++            'libraries': [
++                '-ldxguid -ld3d9 -lgdi32 -lsetupapi'
++            ]
+         },
+ 
+         {
+             'target_name': 'libEGL_static',
+             'type': 'static_library',
+diff --git a/src/libGLESv2.gypi b/src/libGLESv2.gypi
+index 9caa9402d6..54c71052a0 100644
+--- a/src/libGLESv2.gypi
++++ b/src/libGLESv2.gypi
+@@ -1292,11 +1292,17 @@
+             [
+                 ['angle_build_winrt==1',
+                 {
+                     'msvs_requires_importlibrary' : 'true',
+                 }],
++                ['TARGET=="win32" or TARGET=="win64"', {
++                    'ldflags': [ '-Wl,--out-implib,libGLESv2.dll.a ../src/libGLESv2/libGLESv2_autogen.def -Wl,--enable-stdcall-fixup' ],
++                }],
+             ],
++            'libraries': [
++                '-ldxguid -ld3d9 -lgdi32 -lsetupapi'
++            ]
+         },
+ 
+         {
+             'target_name': 'libGLESv2_static',
+             'type': 'static_library',
+@@ -1352,10 +1358,13 @@
+                     [
+                         'GL_APICALL=__attribute__((visibility("default")))',
+                         'GL_API=__attribute__((visibility("default")))',
+                     ],
+                 }],
++                ['TARGET=="win32" or TARGET=="win64"', {
++                    'ldflags': [ '-Wl,--out-implib,libGLESv1_CM.dll.a ../src/libGLESv1_CM/libGLESv1_CM.def -Wl,--enable-stdcall-fixup' ],
++                }],
+             ],
+         },
+ 
+         {
+             'target_name': 'libGLESv1_CM_static',
