@@ -45,9 +45,6 @@ pkgver() {
 prepare() {
   cd "${srcdir}"/angleproject
 
-  # Provide recent versions of some Windows header files
-  cp ../../d3d11_includes/{d3d11,d3d11_1,d3d11_2,d3d11_3,dxgi,dxgi1_2,dxgi1_3,dxgicommon,dxgiformat,dxgitype}.h include/
-
   ### Fedora team patches ###
   patch -p1 -i ${srcdir}/0000-build-fix.patch
 

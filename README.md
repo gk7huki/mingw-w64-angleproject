@@ -4,4 +4,4 @@
 - Builds optimized i686 and x86_64 release libs.
 - Windows XP support.
 - Undecorated export functions and static std libs for wider compatibility.
-- Includes updated D3D11 headers for mingw-w64 5.0.3.
+- Requires mingw-w64-headers >= 6.0.0.
