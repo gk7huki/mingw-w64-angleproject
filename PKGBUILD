@@ -91,10 +91,10 @@ build() {
 
     #Build shared libraries
     gyp -D angle_enable_vulkan=0 -D use_ozone=0 -D OS=win -D MSVS_VERSION="" -D TARGET=${_target} --format make --generator-output="${srcdir}/angleproject/build-${_arch}-shared" --depth . -I "${srcdir}/angleproject/gyp/common.gypi" "${srcdir}/angleproject/src/angle.gyp"
-    #gyp -D angle_enable_vulkan=0 -D use_ozone=0 -D OS=win -D MSVS_VERSION="" -D TARGET=${_target} --format make --generator-output="${srcdir}/angleproject/build-${_arch}-static" --depth . -I "${srcdir}/angleproject/gyp/common.gypi" "${srcdir}/angleproject/src/angle.gyp" -D angle_gl_library_type=static_library
+    gyp -D angle_enable_vulkan=0 -D use_ozone=0 -D OS=win -D MSVS_VERSION="" -D TARGET=${_target} --format make --generator-output="${srcdir}/angleproject/build-${_arch}-static" --depth . -I "${srcdir}/angleproject/gyp/common.gypi" "${srcdir}/angleproject/src/angle.gyp" -D angle_gl_library_type=static_library
 
     make -C "${srcdir}/angleproject/build-${_arch}-shared" -j$(($(nproc)+1)) V=1 BUILDTYPE=${_buildtype}
-    #make -C "${srcdir}/angleproject/build-${_arch}-static" -j$(($(nproc)+1)) V=1 BUILDTYPE=${_buildtype}
+    make -C "${srcdir}/angleproject/build-${_arch}-static" -j$(($(nproc)+1)) V=1 BUILDTYPE=${_buildtype}
   done
 }
 
@@ -120,8 +120,8 @@ package() {
     install "${srcdir}"/angleproject/build-${_arch}-shared/libEGL.dll.a "${pkgdir}/${_arch}"/lib/
     ${_arch}-strip --strip-unneeded "${pkgdir}/${_arch}"/lib/*.dll.a
     
-    #install "${srcdir}"/angleproject/build-${_arch}-static/out/${_buildtype}/obj.target/src/{libGLESv2.a,libGLESv1_CM.a,libEGL.a} "${pkgdir}/${_arch}"/lib/
-    #${_arch}-strip --strip-unneeded "${pkgdir}/${_arch}"/lib/{libGLESv2.a,libGLESv1_CM.a,libEGL.a}
+    install "${srcdir}"/angleproject/build-${_arch}-static/out/${_buildtype}/obj.target/src/{libGLESv2.a,libGLESv1_CM.a,libEGL.a} "${pkgdir}/${_arch}"/lib/
+    ${_arch}-strip --strip-unneeded "${pkgdir}/${_arch}"/lib/{libGLESv2.a,libGLESv1_CM.a,libEGL.a}
 
     cp -Rv include/{EGL,GLES,GLES2,GLES3,KHR} "${pkgdir}/${_arch}"/include/
   done
