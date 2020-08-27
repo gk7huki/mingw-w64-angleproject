@@ -1,0 +1,41 @@
+From 733f4b21749f0b2b8b8aef3bd883dff697679c25 Mon Sep 17 00:00:00 2001
+From: huki <gk7huki@gmail.com>
+Date: Wed, 26 Aug 2020 21:05:17 +0530
+Subject: [PATCH 3/5] add link libraries
+
+---
+ src/libEGL.gypi    | 3 +++
+ src/libGLESv2.gypi | 3 +++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/src/libEGL.gypi b/src/libEGL.gypi
+index c1d7abcbd..d18295912 100644
+--- a/src/libEGL.gypi
++++ b/src/libEGL.gypi
+@@ -53,6 +53,9 @@
+                     },
+                 }],
+             ],
++            'libraries': [
++                '-ldxguid -ld3d9 -lgdi32 -lsetupapi'
++            ]
+         },
+ 
+         {
+diff --git a/src/libGLESv2.gypi b/src/libGLESv2.gypi
+index 31a32e072..8f2597cc4 100644
+--- a/src/libGLESv2.gypi
++++ b/src/libGLESv2.gypi
+@@ -1312,6 +1312,9 @@
+                     'msvs_requires_importlibrary' : 'true',
+                 }],
+             ],
++            'libraries': [
++                '-ldxguid -ld3d9 -lgdi32 -lsetupapi'
++            ]
+         },
+ 
+         {
+-- 
+2.28.0
+

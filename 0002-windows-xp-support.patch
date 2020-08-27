@@ -1,24 +1,28 @@
+From 1896fc8a213726f9952c8203647b10aa773de987 Mon Sep 17 00:00:00 2001
+From: huki <gk7huki@gmail.com>
+Date: Wed, 26 Aug 2020 18:02:53 +0530
+Subject: [PATCH 2/5] windows xp support
+
+---
+ src/common/string_utils.cpp | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
 diff --git a/src/common/string_utils.cpp b/src/common/string_utils.cpp
-index bb1edd2..2e6e228 100644
+index 76b646e35..3d270cd87 100644
 --- a/src/common/string_utils.cpp
 +++ b/src/common/string_utils.cpp
-@@ -147,13 +147,15 @@ Optional<std::vector<wchar_t>> WidenString(size_t length, const char *cString)
-     if (written == 0)
-     {
+@@ -149,9 +149,8 @@ Optional<std::vector<wchar_t>> WidenString(size_t length, const char *cString)
          return Optional<std::vector<wchar_t>>::Invalid();
      }
  #else
 -    size_t convertedChars = 0;
 -    errno_t err = mbstowcs_s(&convertedChars, wcstring.data(), length + 1, cString, _TRUNCATE);
 -    if (err != 0)
-+    //size_t convertedChars = 0;
-+    //errno_t err = mbstowcs_s(&convertedChars, wcstring.data(), length + 1, cString, _TRUNCATE);
-+    //if (err != 0)
 +    size_t written = mbstowcs(wcstring.data(), cString, length + 1);
 +    if (written == 0)
      {
          return Optional<std::vector<wchar_t>>::Invalid();
      }
- #endif
-     return Optional<std::vector<wchar_t>>(wcstring);
+-- 
+2.28.0
 

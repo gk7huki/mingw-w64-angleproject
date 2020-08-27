@@ -1,0 +1,384 @@
+From eaadd126258e77635a97dd6f3564ad0e353e5502 Mon Sep 17 00:00:00 2001
+From: huki <gk7huki@gmail.com>
+Date: Thu, 27 Aug 2020 11:23:15 +0530
+Subject: [PATCH 5/5] fix python2 references
+
+---
+ DEPS                                                   | 10 +++++-----
+ doc/BuildingAngleForWindowsStore.md                    |  2 +-
+ doc/CompilingTranslatorWithEmscripten.md               |  2 +-
+ doc/DevSetup.md                                        |  2 +-
+ gyp/gyp_angle                                          |  2 +-
+ gyp/touch_stamp.py                                     |  2 +-
+ gyp/warnings.gyp                                       |  2 +-
+ scripts/msvs_projects.py                               |  2 +-
+ scripts/run_code_generation.py                         |  4 ++--
+ src/angle.gyp                                          |  4 ++--
+ src/common/gen_uniform_type_table.py                   |  2 +-
+ src/compiler/translator/gen_builtin_symbols.py         |  2 +-
+ .../translator/gen_emulated_builtin_function_tables.py |  2 +-
+ src/libANGLE/gen_copy_conversion_table.py              |  2 +-
+ src/libANGLE/gen_format_map.py                         |  2 +-
+ src/libANGLE/renderer/angle_format.py                  |  2 +-
+ .../renderer/d3d/d3d11/gen_dxgi_format_table.py        |  2 +-
+ .../renderer/d3d/d3d11/gen_dxgi_support_tables.py      |  2 +-
+ .../renderer/d3d/d3d11/gen_texture_format_table.py     |  2 +-
+ src/libANGLE/renderer/gen_angle_format_table.py        |  2 +-
+ src/libANGLE/renderer/gen_load_functions_table.py      |  2 +-
+ src/libANGLE/renderer/gl/generate_gl_dispatch_table.py |  2 +-
+ src/libANGLE/renderer/vulkan/gen_vk_format_table.py    |  2 +-
+ .../renderer/vulkan/gen_vk_internal_shaders.py         |  2 +-
+ .../vulkan/gen_vk_mandatory_format_support_table.py    |  2 +-
+ src/tests/tests.gyp                                    |  4 ++--
+ 26 files changed, 33 insertions(+), 33 deletions(-)
+
+diff --git a/DEPS b/DEPS
+index fcae9566c..ce1450c45 100644
+--- a/DEPS
++++ b/DEPS
+@@ -193,14 +193,14 @@ hooks = [
+     'name': 'sysroot_x86',
+     'pattern': '.',
+     'condition': 'checkout_linux and ((checkout_x86 or checkout_x64) and not build_with_chromium)',
+-    'action': ['python', '{angle_root}/build/linux/sysroot_scripts/install-sysroot.py',
++    'action': ['python2', '{angle_root}/build/linux/sysroot_scripts/install-sysroot.py',
+                '--arch=x86'],
+   },
+   {
+     'name': 'sysroot_x64',
+     'pattern': '.',
+     'condition': 'checkout_linux and (checkout_x64 and not build_with_chromium)',
+-    'action': ['python', '{angle_root}/build/linux/sysroot_scripts/install-sysroot.py',
++    'action': ['python2', '{angle_root}/build/linux/sysroot_scripts/install-sysroot.py',
+                '--arch=x64'],
+   },
+   {
+@@ -208,14 +208,14 @@ hooks = [
+     'name': 'win_toolchain',
+     'pattern': '.',
+     'condition': 'checkout_win and not build_with_chromium',
+-    'action': ['python', '{angle_root}/build/vs_toolchain.py', 'update', '--force'],
++    'action': ['python2', '{angle_root}/build/vs_toolchain.py', 'update', '--force'],
+   },
+ 
+   {
+     # Note: On Win, this should run after win_toolchain, as it may use it.
+     'name': 'clang',
+     'pattern': '.',
+-    'action': ['python', '{angle_root}/tools/clang/scripts/update.py'],
++    'action': ['python2', '{angle_root}/tools/clang/scripts/update.py'],
+     'condition': 'not build_with_chromium',
+   },
+ 
+@@ -235,7 +235,7 @@ hooks = [
+   {
+     # A change to a .gyp, .gypi, or to GYP itself should run the generator.
+     'pattern': '.',
+-    'action': ['python', '{angle_root}/gyp/gyp_angle'],
++    'action': ['python2', '{angle_root}/gyp/gyp_angle'],
+     'condition': 'not build_with_chromium',
+   },
+ ]
+diff --git a/doc/BuildingAngleForWindowsStore.md b/doc/BuildingAngleForWindowsStore.md
+index f7949ce5b..da7fcdad1 100644
+--- a/doc/BuildingAngleForWindowsStore.md
++++ b/doc/BuildingAngleForWindowsStore.md
+@@ -25,7 +25,7 @@ Download the ANGLE source by running the following commands:
+ ```
+ git clone https://chromium.googlesource.com/angle/angle
+ cd angle
+-python scripts/bootstrap.py
++python2 scripts/bootstrap.py
+ gclient sync
+ git checkout master
+ ```
+diff --git a/doc/CompilingTranslatorWithEmscripten.md b/doc/CompilingTranslatorWithEmscripten.md
+index 8b6654201..fcb7dbbc9 100644
+--- a/doc/CompilingTranslatorWithEmscripten.md
++++ b/doc/CompilingTranslatorWithEmscripten.md
+@@ -74,7 +74,7 @@ together:
+ ./emcc -Iangle/include -Iangle/src angle/samples/translator/translator.cpp angle/src/compiler/preprocessor/*.cpp angle/src/compiler/translator/*.cpp angle/src/compiler/translator/timing/*.cpp angle/src/compiler/translator/depgraph/*.cpp angle/src/third_party/compiler/*.cpp angle/src/common/*.cpp -o translator.html --preload-file aq-fish-nm.frag -s NO_EXIT_RUNTIME=1
+ ```
+ 
+-Serve up the resulting translator.html via `python -m SimpleHTTPServer`.
++Serve up the resulting translator.html via `python2 -m SimpleHTTPServer`.
+ Navigate the browser to localhost:8000.
+ 
+ The translator sample will run, displaying its output into the text area on the
+diff --git a/doc/DevSetup.md b/doc/DevSetup.md
+index 9cbf50a54..19b347405 100644
+--- a/doc/DevSetup.md
++++ b/doc/DevSetup.md
+@@ -43,7 +43,7 @@ On MacOS:
+ ```
+ git clone https://chromium.googlesource.com/angle/angle
+ cd angle
+-python scripts/bootstrap.py
++python2 scripts/bootstrap.py
+ gclient sync
+ git checkout master
+ ```
+diff --git a/gyp/gyp_angle b/gyp/gyp_angle
+index 8651f16aa..b2ecf5f51 100755
+--- a/gyp/gyp_angle
++++ b/gyp/gyp_angle
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ 
+ # Copyright (c) 2010 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+diff --git a/gyp/touch_stamp.py b/gyp/touch_stamp.py
+index 162f435cf..0bfa83776 100644
+--- a/gyp/touch_stamp.py
++++ b/gyp/touch_stamp.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ #
+ # Copyright (c) 2015 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+diff --git a/gyp/warnings.gyp b/gyp/warnings.gyp
+index a010427f1..26facbe4d 100644
+--- a/gyp/warnings.gyp
++++ b/gyp/warnings.gyp
+@@ -21,7 +21,7 @@
+                     ],
+                     'action':
+                     [
+-                        'python', '-c', 'print "See https://chromium.googlesource.com/angle/angle/+/master/doc/DevSetup.md for new build instructions."',
++                        'python2', '-c', 'print "See https://chromium.googlesource.com/angle/angle/+/master/doc/DevSetup.md for new build instructions."',
+                     ],
+                 },
+             ],
+diff --git a/scripts/msvs_projects.py b/scripts/msvs_projects.py
+index 08d627738..a573d9d11 100755
+--- a/scripts/msvs_projects.py
++++ b/scripts/msvs_projects.py
+@@ -35,6 +35,6 @@ for potential_dir in os.listdir(out_dir):
+         generate_projects(path)
+ 
+ # Run the helper utility that merges the projects.
+-args = ['python', os.path.join('build', 'win', 'gn_meta_sln.py')]
++args = ['python2', os.path.join('build', 'win', 'gn_meta_sln.py')]
+ print('Running "' + ' '.join(args) + '"')
+ subprocess.call(args)
+diff --git a/scripts/run_code_generation.py b/scripts/run_code_generation.py
+index 809cbb838..9329db587 100755
+--- a/scripts/run_code_generation.py
++++ b/scripts/run_code_generation.py
+@@ -32,7 +32,7 @@ def rebase_script_input_path(script_path, input_file_path):
+     return os.path.relpath(os.path.join(os.path.dirname(script_path), input_file_path), root_dir);
+ 
+ def grab_from_script(script, param):
+-    res = subprocess.check_output(['python', script, param]).strip()
++    res = subprocess.check_output(['python2', script, param]).strip()
+     return [clean_path_slashes(rebase_script_input_path(script, name)) for name in res.split(',')]
+ 
+ def auto_script(script):
+@@ -194,7 +194,7 @@ for name, info in sorted(generators.iteritems()):
+         os.chdir(get_child_script_dirname(script))
+ 
+         print('Running ' + name + ' code generator')
+-        if subprocess.call(['python', os.path.basename(script)]) != 0:
++        if subprocess.call(['python2', os.path.basename(script)]) != 0:
+             sys.exit(1)
+ 
+ if any_dirty:
+diff --git a/src/angle.gyp b/src/angle.gyp
+index 818b45df5..bbe768147 100644
+--- a/src/angle.gyp
++++ b/src/angle.gyp
+@@ -11,7 +11,7 @@
+         'angle_id_script': '<(angle_gen_path)/<(angle_id_script_base)',
+         'angle_id_header_base': 'commit.h',
+         'angle_id_header': '<(angle_gen_path)/id/<(angle_id_header_base)',
+-        'angle_use_commit_id%': '<!(python <(angle_id_script_base) check ..)',
++        'angle_use_commit_id%': '<!(python2 <(angle_id_script_base) check ..)',
+         'angle_enable_d3d9%': 0,
+         'angle_enable_d3d11%': 0,
+         'angle_enable_gl%': 0,
+@@ -390,7 +390,7 @@
+                             'msvs_cygwin_shell': 0,
+                             'action':
+                             [
+-                                'python', '<(angle_id_script)', 'gen', '<(angle_path)', '<(angle_id_header)'
++                                'python2', '<(angle_id_script)', 'gen', '<(angle_path)', '<(angle_id_header)'
+                             ],
+                         },
+                     ],
+diff --git a/src/common/gen_uniform_type_table.py b/src/common/gen_uniform_type_table.py
+index c824eef10..6b4668239 100644
+--- a/src/common/gen_uniform_type_table.py
++++ b/src/common/gen_uniform_type_table.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2017 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/compiler/translator/gen_builtin_symbols.py b/src/compiler/translator/gen_builtin_symbols.py
+index abbb94890..8fd9c1ede 100644
+--- a/src/compiler/translator/gen_builtin_symbols.py
++++ b/src/compiler/translator/gen_builtin_symbols.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2018 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/compiler/translator/gen_emulated_builtin_function_tables.py b/src/compiler/translator/gen_emulated_builtin_function_tables.py
+index 7bf6b610e..be06b24d1 100644
+--- a/src/compiler/translator/gen_emulated_builtin_function_tables.py
++++ b/src/compiler/translator/gen_emulated_builtin_function_tables.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2017 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/libANGLE/gen_copy_conversion_table.py b/src/libANGLE/gen_copy_conversion_table.py
+index f2c9603d5..d3e487b2f 100644
+--- a/src/libANGLE/gen_copy_conversion_table.py
++++ b/src/libANGLE/gen_copy_conversion_table.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2016 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/libANGLE/gen_format_map.py b/src/libANGLE/gen_format_map.py
+index e150fc0bc..6d2d26326 100644
+--- a/src/libANGLE/gen_format_map.py
++++ b/src/libANGLE/gen_format_map.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2016 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/libANGLE/renderer/angle_format.py b/src/libANGLE/renderer/angle_format.py
+index 1f1bab9d3..e101474f7 100644
+--- a/src/libANGLE/renderer/angle_format.py
++++ b/src/libANGLE/renderer/angle_format.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2016 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/libANGLE/renderer/d3d/d3d11/gen_dxgi_format_table.py b/src/libANGLE/renderer/d3d/d3d11/gen_dxgi_format_table.py
+index f3ca1d82e..5f25dc863 100644
+--- a/src/libANGLE/renderer/d3d/d3d11/gen_dxgi_format_table.py
++++ b/src/libANGLE/renderer/d3d/d3d11/gen_dxgi_format_table.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2016 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/libANGLE/renderer/d3d/d3d11/gen_dxgi_support_tables.py b/src/libANGLE/renderer/d3d/d3d11/gen_dxgi_support_tables.py
+index 593daf976..a2713e1af 100644
+--- a/src/libANGLE/renderer/d3d/d3d11/gen_dxgi_support_tables.py
++++ b/src/libANGLE/renderer/d3d/d3d11/gen_dxgi_support_tables.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2015 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/libANGLE/renderer/d3d/d3d11/gen_texture_format_table.py b/src/libANGLE/renderer/d3d/d3d11/gen_texture_format_table.py
+index 3d20aa762..fd34883d2 100644
+--- a/src/libANGLE/renderer/d3d/d3d11/gen_texture_format_table.py
++++ b/src/libANGLE/renderer/d3d/d3d11/gen_texture_format_table.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2015 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/libANGLE/renderer/gen_angle_format_table.py b/src/libANGLE/renderer/gen_angle_format_table.py
+index 3d412f0f4..ea6a77a96 100644
+--- a/src/libANGLE/renderer/gen_angle_format_table.py
++++ b/src/libANGLE/renderer/gen_angle_format_table.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2016 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/libANGLE/renderer/gen_load_functions_table.py b/src/libANGLE/renderer/gen_load_functions_table.py
+index c91b20151..b11c0863a 100755
+--- a/src/libANGLE/renderer/gen_load_functions_table.py
++++ b/src/libANGLE/renderer/gen_load_functions_table.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2015 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/libANGLE/renderer/gl/generate_gl_dispatch_table.py b/src/libANGLE/renderer/gl/generate_gl_dispatch_table.py
+index 090514e1b..5e4369d8b 100644
+--- a/src/libANGLE/renderer/gl/generate_gl_dispatch_table.py
++++ b/src/libANGLE/renderer/gl/generate_gl_dispatch_table.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2017 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/libANGLE/renderer/vulkan/gen_vk_format_table.py b/src/libANGLE/renderer/vulkan/gen_vk_format_table.py
+index 1e769f692..58b5040b4 100644
+--- a/src/libANGLE/renderer/vulkan/gen_vk_format_table.py
++++ b/src/libANGLE/renderer/vulkan/gen_vk_format_table.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2016 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/libANGLE/renderer/vulkan/gen_vk_internal_shaders.py b/src/libANGLE/renderer/vulkan/gen_vk_internal_shaders.py
+index c34a2d71c..7cd16eeda 100644
+--- a/src/libANGLE/renderer/vulkan/gen_vk_internal_shaders.py
++++ b/src/libANGLE/renderer/vulkan/gen_vk_internal_shaders.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2018 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/libANGLE/renderer/vulkan/gen_vk_mandatory_format_support_table.py b/src/libANGLE/renderer/vulkan/gen_vk_mandatory_format_support_table.py
+index ab15d0354..754191003 100644
+--- a/src/libANGLE/renderer/vulkan/gen_vk_mandatory_format_support_table.py
++++ b/src/libANGLE/renderer/vulkan/gen_vk_mandatory_format_support_table.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/python
++#!/usr/bin/python2
+ # Copyright 2018 The ANGLE Project Authors. All rights reserved.
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+diff --git a/src/tests/tests.gyp b/src/tests/tests.gyp
+index 99871344c..a1c9580f5 100644
+--- a/src/tests/tests.gyp
++++ b/src/tests/tests.gyp
+@@ -285,7 +285,7 @@
+                                     ],
+                                     'action':
+                                     [
+-                                        'python',
++                                        'python2',
+                                         '<(gles_conformance_tests_generator_script)',
+                                         '<(gles2_conformance_tests_input_file)',
+                                         '<(gles_conformance_tests_input_dir)',
+@@ -352,7 +352,7 @@
+                                     ],
+                                     'action':
+                                     [
+-                                        'python',
++                                        'python2',
+                                         '<(gles_conformance_tests_generator_script)',
+                                         '<(gles3_conformance_tests_input_file)',
+                                         '<(gles_conformance_tests_input_dir)',
+-- 
+2.28.0
+

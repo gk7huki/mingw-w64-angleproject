@@ -1,0 +1,41 @@
+From e467a816e93719342cd164775caaff0addeac189 Mon Sep 17 00:00:00 2001
+From: huki <gk7huki@gmail.com>
+Date: Wed, 26 Aug 2020 21:18:54 +0530
+Subject: [PATCH 4/5] use import library and def file
+
+---
+ src/libEGL.gypi    | 3 +++
+ src/libGLESv2.gypi | 3 +++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/src/libEGL.gypi b/src/libEGL.gypi
+index d18295912..6a23e4de2 100644
+--- a/src/libEGL.gypi
++++ b/src/libEGL.gypi
+@@ -52,6 +52,9 @@
+                         'DYLIB_INSTALL_NAME_BASE': '@rpath',
+                     },
+                 }],
++                ['TARGET=="win32" or TARGET=="win64"', {
++                    'ldflags': [ '-Wl,--out-implib,out/libEGL.dll.a ../src/libEGL/libEGL.def -Wl,--enable-stdcall-fixup' ],
++                }],
+             ],
+             'libraries': [
+                 '-ldxguid -ld3d9 -lgdi32 -lsetupapi'
+diff --git a/src/libGLESv2.gypi b/src/libGLESv2.gypi
+index 8f2597cc4..1bba8ea0a 100644
+--- a/src/libGLESv2.gypi
++++ b/src/libGLESv2.gypi
+@@ -1311,6 +1311,9 @@
+                 {
+                     'msvs_requires_importlibrary' : 'true',
+                 }],
++                ['TARGET=="win32" or TARGET=="win64"', {
++                    'ldflags': [ '-Wl,--out-implib,out/libGLESv2.dll.a ../src/libGLESv2/libGLESv2_autogen.def -Wl,--enable-stdcall-fixup' ],
++                }],
+             ],
+             'libraries': [
+                 '-ldxguid -ld3d9 -lgdi32 -lsetupapi'
+-- 
+2.28.0
+

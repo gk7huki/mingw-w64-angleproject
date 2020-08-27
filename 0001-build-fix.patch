@@ -1,8 +1,19 @@
+From 52326f324335031127c48cdbf57512d537b95117 Mon Sep 17 00:00:00 2001
+From: huki <gk7huki@gmail.com>
+Date: Wed, 26 Aug 2020 17:56:34 +0530
+Subject: [PATCH 1/5] build fix
+
+---
+ src/angle.gyp         | 10 +++++-----
+ src/common/mathutil.h |  3 +++
+ util/util.gyp         |  7 +++++++
+ 3 files changed, 15 insertions(+), 5 deletions(-)
+
 diff --git a/src/angle.gyp b/src/angle.gyp
-index 4095547..3db4840 100644
+index 04c9c4f33..818b45df5 100644
 --- a/src/angle.gyp
 +++ b/src/angle.gyp
-@@ -76,7 +76,7 @@
+@@ -355,7 +355,7 @@
              [
                  {
                      'destination': '<(angle_gen_path)',
@@ -11,7 +22,7 @@ index 4095547..3db4840 100644
                  },
              ],
              'conditions':
-@@ -206,10 +206,10 @@
+@@ -466,10 +466,10 @@
                                      'outputs': [ '<(PRODUCT_DIR)/d3dcompiler_47.dll' ],
                                      'action':
                                      [
@@ -19,20 +30,18 @@ index 4095547..3db4840 100644
 -                                        "$(PlatformName)",
 -                                        "<(windows_sdk_path)",
 -                                        "<(PRODUCT_DIR)"
-+#                                        "<(angle_gen_path)/copy_compiler_dll.bat",
-+#                                        "$(PlatformName)",
-+#                                        "<(windows_sdk_path)",
-+#                                        "<(PRODUCT_DIR)"
++#                                       "<(angle_gen_path)/copy_compiler_dll.bat",
++#                                       "$(PlatformName)",
++#                                       "<(windows_sdk_path)",
++#                                       "<(PRODUCT_DIR)"
                                      ],
                                  },
                              ], #actions
 diff --git a/src/common/mathutil.h b/src/common/mathutil.h
-index e096b1a..716aeb6 100644
+index 7e8db3cd8..94a5e8bbc 100644
 --- a/src/common/mathutil.h
 +++ b/src/common/mathutil.h
-@@ -13,10 +13,13 @@
- #include <stdint.h>
- #include <stdlib.h>
+@@ -15,6 +15,9 @@
  #include <string.h>
  #include <algorithm>
  #include <limits>
@@ -42,36 +51,24 @@ index e096b1a..716aeb6 100644
  
  #include <anglebase/numerics/safe_math.h>
  
- #include "common/debug.h"
- #include "common/platform.h"
-diff --git a/src/libANGLE/renderer/gl/wgl/functionswgl_typedefs.h b/src/libANGLE/renderer/gl/wgl/functionswgl_typedefs.h
-index c4b79ee..f22609b 100644
---- a/src/libANGLE/renderer/gl/wgl/functionswgl_typedefs.h
-+++ b/src/libANGLE/renderer/gl/wgl/functionswgl_typedefs.h
-@@ -23,7 +23,7 @@ typedef HGLRC(WINAPI *PFNWGLCREATELAYERCONTEXTPROC)(HDC, int);
- typedef BOOL(WINAPI *PFNWGLDELETECONTEXTPROC)(HGLRC);
- typedef HGLRC(WINAPI *PFNWGLGETCURRENTCONTEXTPROC)(VOID);
- typedef HDC(WINAPI *PFNWGLGETCURRENTDCPROC)(VOID);
--typedef PROC(WINAPI *PFNWGLGETPROCADDRESSPROC)(LPCSTR);
-+typedef void*(WINAPI *PFNWGLGETPROCADDRESSPROC)(LPCSTR);
- typedef BOOL(WINAPI *PFNWGLMAKECURRENTPROC)(HDC, HGLRC);
- typedef BOOL(WINAPI *PFNWGLSHARELISTSPROC)(HGLRC, HGLRC);
- typedef BOOL(WINAPI *PFNWGLUSEFONTBITMAPSAPROC)(HDC, DWORD, DWORD, DWORD);
 diff --git a/util/util.gyp b/util/util.gyp
-index bda8a0530..2a87e57e7 100644
+index f53eb6712..c75b7fbf0 100644
 --- a/util/util.gyp
 +++ b/util/util.gyp
-@@ -118,6 +118,13 @@
+@@ -125,6 +125,13 @@
                          [
                              '<@(util_win32_sources)',
                          ],
-+						'link_settings':
-+						{
-+							'libraries':
-+							[
-+								'-lgdi32',
-+							]
-+						},
++                        'link_settings':
++                        {
++                            'libraries':
++                            [
++                                '-lgdi32',
++                            ]
++                        },
                      }],
                      ['OS=="win" and angle_build_winrt==1',
                      {
+-- 
+2.28.0
+

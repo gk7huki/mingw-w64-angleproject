@@ -7,11 +7,11 @@
 # Contributor: jellysheep <max DOT mail AT dameweb DOT de>
 # Contributor: Ray Donnelly <mingw.android@gmail.com>
 
-_angle_branch="#branch=chromium/3427"
+_angle_branch="#branch=chromium/3497"
 
 pkgname='mingw-w64-angleproject'
 pkgdesc='ANGLE project (mingw-w64)'
-pkgver=2.1.r8420
+pkgver=2.1.r8796
 pkgrel=1
 arch=('any')
 url='https://chromium.googlesource.com/angle/angle'
@@ -22,17 +22,17 @@ provides=("mingw-w64-angleproject")
 conflicts=("mingw-w64-angleproject")
 options=('strip' '!buildflags' 'staticlibs')
 source=("angleproject"::git+https://chromium.googlesource.com/angle/angle$_angle_branch
-        0000-build-fix.patch
-        0001-include-import-library-and-use-def-file.patch
-        0002-provide-windows-xp-support.patch
-        0003-static-build-workaround.patch
-        0004-redist.patch)
+        0001-build-fix.patch
+        0002-windows-xp-support.patch
+        0003-add-link-libraries.patch
+        0004-use-import-library-and-def-file.patch
+        0005-fix-python2-references.patch)
 sha256sums=('SKIP'
-            'c59de5a4705732f737cd5c5fa1c7ba372b695008803f7ff3d6428947badb7dfa'
-            'acdf4672d473d76ac3d4b7ae7c4022feffbe4239467f80ebe68dd5c1a268d353'
-            'e0a58c66ec14cdc1f9ba54f46fa57e8b246a291ff72185bcb4ec8c534e55a77d'
-            '42a9e7d4e4365ce119fe5b036a088f226e35b0f6bb51913f3635e01fb53ef1a6'
-            'dc9ac8ffa9df3bab614cb14d2743804e26a84d5cb1a644b66788919917b9c3cd')
+            '3b08b59424474aa1d54167fe96643e4e1dd54cc0fed654edbc12478b7b316e25'
+            '14c2c731f341a9c6274efb4958f1ec93e72ea9fb4c3e3c648551608230b18b78'
+            'f9fb1f87019dd6a6f7d9225dbc8d29fa3ce656a1510a00cf48f92c16b4c7b427'
+            '61b5bf19aa73c1de54caf4b13170a48e89d8337c852f6f54eda2c49adbfaed41'
+            '0f777b38b4e0f9befaa5db4df0530605b0f812bba2ed0af03d776a76f2bb272e')
 _architectures=('i686-w64-mingw32' 'x86_64-w64-mingw32')
 
 pkgver() {
@@ -45,31 +45,29 @@ pkgver() {
 prepare() {
   cd "${srcdir}"/angleproject
 
-  ### Fedora team patches ###
-  patch -p1 -i ${srcdir}/0000-build-fix.patch
-
-  # Make sure an import library is created and def file is used during the build
-  patch -p1 -i ${srcdir}/0001-include-import-library-and-use-def-file.patch
+  # MinGW build fixes
+  patch -p1 -i ${srcdir}/0001-build-fix.patch
 
   # Provide Windows XP support
-  patch -p1 -i ${srcdir}/0002-provide-windows-xp-support.patch
+  patch -p1 -i ${srcdir}/0002-windows-xp-support.patch
 
-  # Static build workaround
-  patch -p1 -i ${srcdir}/0003-static-build-workaround.patch
+  # Add missing link libraries
+  patch -p1 -i ${srcdir}/0003-add-link-libraries.patch
+
+  # Make sure an import library is created and def file is used
+  patch -p1 -i ${srcdir}/0004-use-import-library-and-def-file.patch
   
-  # Out of source directory fix
-  patch -p1 -i ${srcdir}/0004-redist.patch
+  # Change references to python into python2
+  patch -p1 -i ${srcdir}/0005-fix-python2-references.patch
 }
 
 build() {
   cd "${srcdir}"/angleproject
 
   export PYTHON=/usr/bin/python2
-  sed -i -e 's_python _python2 _g' -e 's_"python"_"python2"_g' -e "s_'python'_'python2'_g" -e 's_/usr/bin/python$_/usr/bin/python2_g' $(find -not \( -path "./.git*" -prune \) -type f)
 
   for _arch in ${_architectures[@]}; do
-    mkdir -p "${srcdir}"/angleproject/build-${_arch}-shared
-    #mkdir -p "${srcdir}"/angleproject/build-${_arch}-static
+    mkdir -p "${srcdir}"/angleproject/build_${_arch}_shared
 
     # Set ar/compiler and architecture specific compiler flags
     export CC="${_arch}-gcc"
@@ -89,12 +87,9 @@ build() {
       _buildtype="Release_x64"
     fi
 
-    #Build shared libraries
-    gyp -D angle_enable_vulkan=0 -D use_ozone=0 -D OS=win -D MSVS_VERSION="" -D TARGET=${_target} --format make --generator-output="${srcdir}/angleproject/build-${_arch}-shared" --depth . -I "${srcdir}/angleproject/gyp/common.gypi" "${srcdir}/angleproject/src/angle.gyp"
-    gyp -D angle_enable_vulkan=0 -D use_ozone=0 -D OS=win -D MSVS_VERSION="" -D TARGET=${_target} --format make --generator-output="${srcdir}/angleproject/build-${_arch}-static" --depth . -I "${srcdir}/angleproject/gyp/common.gypi" "${srcdir}/angleproject/src/angle.gyp" -D angle_gl_library_type=static_library
-
-    make -C "${srcdir}/angleproject/build-${_arch}-shared" -j$(($(nproc)+1)) V=1 BUILDTYPE=${_buildtype}
-    make -C "${srcdir}/angleproject/build-${_arch}-static" -j$(($(nproc)+1)) V=1 BUILDTYPE=${_buildtype}
+    # Build shared libraries
+    gyp -D angle_enable_vulkan=0 -D use_ozone=0 -D OS=win -D MSVS_VERSION="" -D TARGET=${_target} --format make --generator-output="${srcdir}/angleproject/build_${_arch}_shared" --depth . -I "${srcdir}/angleproject/gyp/common.gypi" "${srcdir}/angleproject/src/angle.gyp"
+    make -C "${srcdir}/angleproject/build_${_arch}_shared" libEGL -j$(($(nproc)+1)) V=1 BUILDTYPE=${_buildtype}
   done
 }
 
@@ -110,19 +105,14 @@ package() {
       _buildtype="Release_x64"
     fi
 
-    install "${srcdir}"/angleproject/build-${_arch}-shared/out/${_buildtype}/lib.target/libGLESv2.so "${pkgdir}/${_arch}"/bin/libGLESv2.dll
-    install "${srcdir}"/angleproject/build-${_arch}-shared/out/${_buildtype}/lib.target/libGLESv1_CM.so "${pkgdir}/${_arch}"/bin/libGLESv1_CM.dll
-    install "${srcdir}"/angleproject/build-${_arch}-shared/out/${_buildtype}/lib.target/libEGL.so "${pkgdir}/${_arch}"/bin/libEGL.dll
+    install "${srcdir}"/angleproject/build_${_arch}_shared/out/${_buildtype}/lib.target/libGLESv2.so "${pkgdir}/${_arch}"/bin/libGLESv2.dll
+    install "${srcdir}"/angleproject/build_${_arch}_shared/out/${_buildtype}/lib.target/libEGL.so "${pkgdir}/${_arch}"/bin/libEGL.dll
     ${_arch}-strip --strip-unneeded "${pkgdir}/${_arch}"/bin/*.dll
 
-    install "${srcdir}"/angleproject/build-${_arch}-shared/libGLESv2.dll.a "${pkgdir}/${_arch}"/lib/
-    install "${srcdir}"/angleproject/build-${_arch}-shared/libGLESv1_CM.dll.a "${pkgdir}/${_arch}"/lib/
-    install "${srcdir}"/angleproject/build-${_arch}-shared/libEGL.dll.a "${pkgdir}/${_arch}"/lib/
+    install "${srcdir}"/angleproject/build_${_arch}_shared/out/libGLESv2.dll.a "${pkgdir}/${_arch}"/lib/libGLESv2.dll.a
+    install "${srcdir}"/angleproject/build_${_arch}_shared/out/libEGL.dll.a "${pkgdir}/${_arch}"/lib/libEGL.dll.a
     ${_arch}-strip --strip-unneeded "${pkgdir}/${_arch}"/lib/*.dll.a
-    
-    install "${srcdir}"/angleproject/build-${_arch}-static/out/${_buildtype}/obj.target/src/{libGLESv2.a,libGLESv1_CM.a,libEGL.a} "${pkgdir}/${_arch}"/lib/
-    ${_arch}-strip --strip-unneeded "${pkgdir}/${_arch}"/lib/{libGLESv2.a,libGLESv1_CM.a,libEGL.a}
 
-    cp -Rv include/{EGL,GLES,GLES2,GLES3,KHR} "${pkgdir}/${_arch}"/include/
+    cp -Rv include/{EGL,GLES2,GLES3} "${pkgdir}/${_arch}"/include/
   done
 }
